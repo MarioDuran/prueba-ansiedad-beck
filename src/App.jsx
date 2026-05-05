@@ -14,7 +14,6 @@ import {
   Plus
 } from 'lucide-react';
 
-// --- DATOS DEL TEST ---
 const QUESTIONS = [
   "Torpe o entumecido",
   "Acalorado",
@@ -47,8 +46,6 @@ const OPTIONS = [
 ];
 
 export default function App() {
-  // --- ESTADOS ---
-  // views: 'demographics' | 'test' | 'results' | 'admin'
   const [currentView, setCurrentView] = useState('demographics');
   const [records, setRecords] = useState(() => {
     try {
@@ -59,7 +56,6 @@ export default function App() {
   });
   const [secretClicks, setSecretClicks] = useState(0);
   
-  // Estado actual del usuario rellenando el test
   const [currentUser, setCurrentUser] = useState({ edad: '', carrera: '' });
   const [answers, setAnswers] = useState({}); // { index_pregunta: valor }
   const [error, setError] = useState('');
@@ -67,8 +63,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bai_records', JSON.stringify(records));
   }, [records]);
-
-
 
   useEffect(() => {
     try {
@@ -78,7 +72,6 @@ export default function App() {
     }
   }, [records]);
 
-  // --- MANEJADORES ---
   const handleSecretClick = () => {
     const newClicks = secretClicks + 1;
     setSecretClicks(newClicks);
@@ -90,7 +83,6 @@ export default function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Resetear el contador de clicks después de 2 segundos de inactividad
     setTimeout(() => {
       setSecretClicks(0);
     }, 2000);
@@ -100,7 +92,6 @@ export default function App() {
     let { name, value } = e.target;
     
     if (name === 'carrera') {
-      // Solo letras, forzar mayúsculas, máximo 4 caracteres
       value = value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
     }
     
@@ -109,7 +100,7 @@ export default function App() {
   };
 
   const adjustAge = (amount) => {
-    let currentAge = parseInt(currentUser.edad) || 18; // Edad por defecto si está vacío
+    let currentAge = parseInt(currentUser.edad) || 18; 
     let newAge = currentAge + amount;
     if (newAge < 1) newAge = 1;
     if (newAge > 120) newAge = 120;
@@ -134,24 +125,20 @@ export default function App() {
   };
 
   const submitTest = () => {
-    // Validar que se hayan respondido las 21 preguntas
     if (Object.keys(answers).length < QUESTIONS.length) {
       setError('Por favor, responde todas las preguntas antes de finalizar el test.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // Calcular puntuación
     let totalScore = 0;
     Object.values(answers).forEach(val => totalScore += val);
 
-    // Determinar interpretación
     let interpretation = '';
     if (totalScore <= 21) interpretation = 'Ansiedad muy baja';
     else if (totalScore <= 35) interpretation = 'Ansiedad moderada';
     else interpretation = 'Ansiedad severa';
 
-    // Guardar registro
     const newRecord = {
       id: Date.now(),
       date: new Date().toISOString(),
@@ -209,8 +196,6 @@ export default function App() {
     link.click();
     document.body.removeChild(link);
   };
-
-  // --- COMPONENTES DE VISTA ---
 
   const renderDemographics = () => (
     <div className="max-w-md mx-auto bg-white p-8 sm:p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden">
@@ -281,81 +266,88 @@ export default function App() {
     </div>
   );
 
-  const renderTest = () => {
-    const answeredCount = Object.keys(answers).length;
-    const progress = Math.round((answeredCount / QUESTIONS.length) * 100);
+const renderTest = () => {
+  const answeredCount = Object.keys(answers).length;
+  const progress = Math.round((answeredCount / QUESTIONS.length) * 100);
 
-    return (
-      <div className="max-w-3xl mx-auto">
-        {/* Sticky Progress Header */}
-        <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-slate-100 mb-8 sticky top-4 z-10">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-bold text-slate-800">Prueba de Ansiedad de BECK</h2>
-            <span className="text-sm font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
-              {answeredCount} / {QUESTIONS.length}
-            </span>
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-100 mb-6 sm:mb-8 sticky top-[4.5rem] sm:top-24 z-10">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h2 className="text-base sm:text-xl font-bold text-slate-800 leading-tight min-w-0">
+            Prueba de Ansiedad de BECK
+          </h2>
+          <span className="text-xs sm:text-sm font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full whitespace-nowrap shrink-0">
+            {answeredCount} / {QUESTIONS.length}
+          </span>
+        </div>
+
+        <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+          <div 
+            className="bg-blue-600 h-full rounded-full transition-all duration-500 ease-out" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+
+        <p className="text-xs sm:text-sm text-slate-500 mt-3 sm:mt-4 font-medium leading-relaxed">
+          Indique cuánto le ha afectado cada síntoma en la <strong className="text-slate-700">última semana, incluyendo hoy</strong>.
+        </p>
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2">
+            <AlertCircle size={18} /> {error}
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-            <div 
-              className="bg-blue-600 h-full rounded-full transition-all duration-500 ease-out" 
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <p className="text-sm text-slate-500 mt-4 font-medium">
-            Indique cuánto le ha afectado cada síntoma en la <strong className="text-slate-700">última semana, incluyendo hoy</strong>.
-          </p>
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2">
-              <AlertCircle size={18} /> {error}
-            </div>
-          )}
-        </div>
-
-        {/* Questions List */}
-        <div className="space-y-6">
-          {QUESTIONS.map((question, qIndex) => (
-            <div key={qIndex} className="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-300">
-              <h3 className="text-xl font-bold text-slate-800 mb-6">
-                <span className="text-slate-400 mr-2">{qIndex + 1}.</span>
-                {question}
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {OPTIONS.map((opt) => {
-                  const isSelected = answers[qIndex] === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleAnswerSelect(qIndex, opt.value)}
-                      className={`relative flex flex-col items-center justify-center p-5 rounded-2xl border-2 transition-all duration-200 outline-none active:scale-95
-                        ${isSelected 
-                          ? 'border-blue-600 bg-blue-50 shadow-sm ring-2 ring-blue-600/20' 
-                          : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50'
-                        }
-                      `}
-                    >
-                      <span className={`text-base sm:text-lg font-bold text-center leading-tight ${isSelected ? 'text-blue-900' : 'text-slate-500'}`}>
-                        {opt.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Submit Section */}
-        <div className="mt-10 mb-8 flex justify-end">
-          <button 
-            onClick={submitTest}
-            className="bg-slate-900 text-white font-bold py-5 px-8 rounded-2xl hover:bg-black transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] flex items-center gap-3 text-lg w-full sm:w-auto justify-center"
-          >
-            Ver Resultados de Evaluación <CheckCircle size={24} />
-          </button>
-        </div>
+        )}
       </div>
-    );
-  };
+
+      <div className="space-y-6">
+        {QUESTIONS.map((question, qIndex) => (
+          <div 
+            key={qIndex} 
+            className="bg-white p-5 sm:p-8 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-300"
+          >
+            <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 sm:mb-6 leading-snug">
+              <span className="text-slate-400 mr-2">{qIndex + 1}.</span>
+              {question}
+            </h3>
+
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
+              {OPTIONS.map((opt) => {
+                const isSelected = answers[qIndex] === opt.value;
+
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleAnswerSelect(qIndex, opt.value)}
+                    className={`relative flex flex-col items-center justify-center min-h-16 sm:min-h-20 px-1.5 sm:px-4 py-3 sm:py-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-200 outline-none active:scale-95
+                      ${isSelected 
+                        ? 'border-blue-600 bg-blue-50 shadow-sm ring-2 ring-blue-600/20' 
+                        : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50'
+                      }
+                    `}
+                  >
+                    <span className={`text-[11px] sm:text-lg font-bold text-center leading-tight break-words ${isSelected ? 'text-blue-900' : 'text-slate-500'}`}>
+                      {opt.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-10 mb-8 flex justify-end">
+        <button 
+          onClick={submitTest}
+          className="bg-slate-900 text-white font-bold py-5 px-8 rounded-2xl hover:bg-black transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] flex items-center gap-3 text-lg w-full sm:w-auto justify-center"
+        >
+          Ver Resultados de Evaluación <CheckCircle size={24} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
   const renderResults = () => {
     const lastRecord = records[records.length - 1];
@@ -493,33 +485,32 @@ export default function App() {
       )}
     </div>
   );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50 text-slate-900 font-sans selection:bg-blue-200 selection:text-blue-900 pb-12">
       
-      {/* Header Clean */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm shadow-slate-200/20">
-        <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-center">
-          {/* LOGO - Botón Oculto */}
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 min-h-16 sm:h-20 flex items-center justify-center">
           <div 
-            className="flex items-center gap-3 text-blue-600 cursor-default select-none active:scale-95 transition-transform" 
+            className="flex items-center gap-2 sm:gap-3 text-blue-600 cursor-default select-none active:scale-95 transition-transform max-w-full" 
             onClick={handleSecretClick}
           >
-            <div className="bg-blue-600 text-white p-2 rounded-xl">
+            <div className="bg-blue-600 text-white p-2 rounded-xl shrink-0">
                <ClipboardList size={26} strokeWidth={2.5} />
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-slate-800">Prueba de Ansiedad de BECK</span>
+            <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-800 leading-tight">
+              Prueba de Ansiedad de BECK
+            </span>
           </div>
         </div>
       </header>
-
-      <main className="max-w-5xl mx-auto px-4 py-10 sm:py-12">
+  
+      <main className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
         {currentView === 'demographics' && renderDemographics()}
         {currentView === 'test' && renderTest()}
         {currentView === 'results' && renderResults()}
         {currentView === 'admin' && renderAdmin()}
       </main>
-
+  
     </div>
   );
 }
