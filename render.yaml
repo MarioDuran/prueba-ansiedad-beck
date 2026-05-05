@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: prueba-ansiedad-beck
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
