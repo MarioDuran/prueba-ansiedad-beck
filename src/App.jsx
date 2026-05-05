@@ -419,7 +419,7 @@ const renderTest = () => {
             <div className="bg-slate-900 p-2 rounded-lg text-white">
               <ShieldCheck size={24} />
             </div>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Panel Oculto</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Admin</h2>
           </div>
           <p className="text-slate-500 font-medium">Datos acumulados en esta sesión: <strong className="text-slate-800">{records.length} registros</strong></p>
         </div>
